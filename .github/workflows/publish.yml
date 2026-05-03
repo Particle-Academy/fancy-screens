@@ -26,13 +26,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Bootstrap publish: token-based until @particle-academy/fancy-screens
-      # exists on npm and Trusted Publisher (OIDC) can be configured at
+      # OIDC publish via Trusted Publisher configured at
       # https://www.npmjs.com/package/@particle-academy/fancy-screens/access
-      # After that's set up, change `--access public` to omit NODE_AUTH_TOKEN
-      # and rely on OIDC. The `id-token: write` permission above is already
-      # in place for the eventual OIDC switch.
+      # No tokens — id-token: write + setup-node's registry-url is all we need.
       - name: Publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx -y npm@latest publish --provenance --access public
