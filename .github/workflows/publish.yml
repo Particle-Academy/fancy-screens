@@ -26,20 +26,13 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Bootstrap publish path: use NPM_TOKEN secret for the very first
-      # version (the @particle-academy/fancy-screens package doesn't exist
-      # on npm yet, so the trusted-publisher OIDC route would 404). After
-      # 0.1.0 lands, configure Trusted Publisher on npmjs.com and remove
-      # NPM_TOKEN from this workflow + the repo secrets.
-      - name: Publish (token-based bootstrap)
-        if: ${{ env.NPM_TOKEN != '' }}
+      # Bootstrap publish: token-based until @particle-academy/fancy-screens
+      # exists on npm and Trusted Publisher (OIDC) can be configured at
+      # https://www.npmjs.com/package/@particle-academy/fancy-screens/access
+      # After that's set up, change `--access public` to omit NODE_AUTH_TOKEN
+      # and rely on OIDC. The `id-token: write` permission above is already
+      # in place for the eventual OIDC switch.
+      - name: Publish
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx -y npm@latest publish --provenance --access public
-
-      # OIDC publish (post-bootstrap). The setup-node@v4 step above
-      # registers the npmrc that this picks up automatically.
-      - name: Publish (OIDC trusted publisher)
-        if: ${{ env.NPM_TOKEN == '' }}
         run: npx -y npm@latest publish --provenance --access public
