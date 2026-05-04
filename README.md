@@ -90,6 +90,10 @@ A screen transitions through `mounting → loading → active → suspended → 
 - Decide whether to wake a hibernated screen vs. read its last-known snapshot
 - Build status bars, debug overlays, and feature-flag checks against the live registry
 
+## Inertia.js integration
+
+Using fancy-screens inside an Inertia app? Install [`@particle-academy/fancy-inertia`](https://github.com/Particle-Academy/fancy-inertia) — it solves the three integration concerns: `<Screen.System>` mounting at app-shell, port store persistence across navigation, and schema-driven page rendering directly from Inertia props (`<InertiaSchemaScreen />` reads `usePage().props.schema`). See [docs/Inertia.md](docs/Inertia.md) for patterns + [fancy-inertia docs/Recipes.md](https://github.com/Particle-Academy/fancy-inertia/blob/main/docs/Recipes.md) for end-to-end examples.
+
 ## Documentation
 
 | Topic | Description |
@@ -97,6 +101,7 @@ A screen transitions through `mounting → loading → active → suspended → 
 | [Screen](docs/Screen.md) | Root component, lifecycle states, patterns for multi-screen apps |
 | [Ports](docs/Ports.md) | Declarative IO contract, validators, cross-screen reads |
 | [Registry](docs/Registry.md) | `useScreens()` and the introspection contract |
+| [Inertia](docs/Inertia.md) | Inertia.js integration patterns (via `@particle-academy/fancy-inertia`) |
 | [Publishing](docs/PUBLISHING.md) | Release process — OIDC trusted publisher |
 
 ## Status

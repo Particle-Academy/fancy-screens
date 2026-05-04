@@ -1,6 +1,6 @@
 {
   "name": "@particle-academy/fancy-screens",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Containerized application surface for fancy components — scoped state, typed ports, hibernation, schema-driven rendering, and an agent-introspectable registry.",
   "repository": {
     "type": "git",
