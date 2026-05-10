@@ -38,14 +38,34 @@ function ScreenRoot({ id, title, children, className }: ScreenProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, title]);
 
+  // Read the live agentActivity for this screen so we can apply a CSS
+  // class while it's set. Subscribers (e.g. agent-integrations) push
+  // updates via system.updateScreen(id, { agentActivity }).
+  const meta = system.registry.get(id);
+  const agentActivity = meta?.agentActivity;
+
   const ctx = useMemo<ScreenContextValue>(
     () => ({ id, title, lifecycle: "active" }),
     [id, title],
   );
 
+  const classes = [
+    className,
+    agentActivity ? "agent-focused-element" : null,
+  ].filter(Boolean).join(" ");
+
+  const style = agentActivity?.agentColor
+    ? ({ ["--agent-color" as any]: agentActivity.agentColor } as React.CSSProperties)
+    : undefined;
+
   return (
     <ScreenContext.Provider value={ctx}>
-      <div data-fancy-screens-screen="" data-screen-id={id} className={className}>
+      <div
+        data-fancy-screens-screen=""
+        data-screen-id={id}
+        className={classes || undefined}
+        style={style}
+      >
         {children}
       </div>
     </ScreenContext.Provider>

@@ -24,6 +24,7 @@ export type {
   ScreenLifecycle,
   ScreenMeta,
   ScreenSystemProps,
+  AgentScreenActivity,
   PortDirection,
   PortSchema,
   PortState,

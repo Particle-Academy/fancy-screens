@@ -57,6 +57,30 @@ export interface ScreenMeta {
   ports: string[];
   /** Wall-clock millis of the last visibility-change to "active". */
   lastActiveAt?: number;
+  /**
+   * Most recent agent activity targeting this screen. Set by the host's
+   * agent-integrations layer (see `AgentScreensBridge` / `useAgentActivity`)
+   * — fancy-screens doesn't import that package, just stores the value.
+   * `null` when no agent is currently active on the screen.
+   */
+  agentActivity?: AgentScreenActivity | null;
+}
+
+/**
+ * Loose shape of an agent presence update written into ScreenMeta. Mirrors
+ * the `AgentActivity` from `@particle-academy/agent-integrations` but kept
+ * loose here so fancy-screens stays dep-free.
+ */
+export interface AgentScreenActivity {
+  agentId: string;
+  agentName?: string;
+  agentColor?: string;
+  action: string;
+  timestamp: number;
+  /** Optional element id within the screen (sticky id, field name, …). */
+  elementId?: string;
+  /** Free-form label. */
+  label?: string;
 }
 
 export interface ScreenProps {
