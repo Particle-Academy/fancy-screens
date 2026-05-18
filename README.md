@@ -1,35 +1,49 @@
 # @particle-academy/fancy-screens
 
-**Containerized application surfaces for fancy components.** A `<Screen>` is a scoped, lifecycle-aware unit — bigger than a tab, smaller than a route. It owns its own state, declares its IO contract through typed **ports**, hibernates when off-view, and composes with siblings into dashboard-grade layouts. Schema-driven mode lets agents author whole pages as JSON. A global registry (`useScreens()`) gives any caller — including agents — structured introspection of the running app.
+**Cross-surface coordination for Human+ apps.** A `<Screen>` is a scoped, addressable application surface — bigger than a tab, smaller than a route. It registers with a global system so agents and presence layers can enumerate and target it, owns its own state (via Zustand stores you bring), and can render either as JSX or from an agent-emitted JSON schema.
 
 ## Why
 
-Tabs and carousels solve presentation, not scope or lifecycle. Routes solve navigation, not parallel composition. There's no IO contract that lets sibling screens share intentional data without leaking the rest of their state. fancy-screens is the missing layer between react-fancy components and a full app.
+In a Human+ app, multiple agents and the user can be working in parallel across different surfaces. The runtime needs:
+
+- **Addressability** — agents reference surfaces by stable id (`screen_focus("sheet")`).
+- **Cross-surface presence** — the user looking at one screen sees a glimpse of agent activity on another.
+- **State introspection** — agents enumerate the Zustand stores attached to each surface and read or mutate them without DOM scraping.
+- **Schema-driven mode** — an LLM emits a JSON page description; the client renders it.
+
+That's what fancy-screens provides. It's deliberately small (~400 lines) and does not implement its own state primitive — state is **Zustand**, registered with the screen system so it's discoverable.
 
 ## Installation
 
 ```bash
-npm install @particle-academy/fancy-screens
+npm install @particle-academy/fancy-screens zustand
 ```
 
-**Peer dependencies (all but react are optional):**
+**Peer dependencies (all optional):**
 - `react >= 18`, `react-dom >= 18`
-- `@particle-academy/react-fancy >= 3` — only if you render react-fancy components inside your screens
+- `zustand >= 4.5` — bring your own state primitive
+- `@particle-academy/react-fancy >= 3` — only if you render its components inside screens or schemas
 
 ## Quick start
 
 ```tsx
-import { Screen, useScreenPort, useScreens } from "@particle-academy/fancy-screens";
+import { create } from "zustand";
+import {
+  Screen,
+  useRegisterStore,
+  useScreens,
+} from "@particle-academy/fancy-screens";
+
+const useUserStore = create<{ name: string; setName: (n: string) => void }>((set) => ({
+  name: "",
+  setName: (name) => set({ name }),
+}));
 
 function App() {
   return (
     <Screen.System>
       <Screen id="profile" title="Profile">
-        <Screen.Port name="user" defaultValue={{ name: "" }} />
-        <Screen.Port name="filter" direction="out" defaultValue="all" />
-        <Screen.Body>
-          <Form />
-        </Screen.Body>
+        <Screen.Body><Form /></Screen.Body>
       </Screen>
       <DebugPanel />
     </Screen.System>
@@ -37,76 +51,44 @@ function App() {
 }
 
 function Form() {
-  const [user, setUser] = useScreenPort<{ name: string }>("user");
-  const [filter, setFilter] = useScreenPort<string>("filter");
-  return (
-    <>
-      <input value={user?.name} onChange={(e) => setUser({ name: e.target.value })} />
-      <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-        <option>all</option><option>active</option><option>archived</option>
-      </select>
-    </>
-  );
+  useRegisterStore("user", useUserStore);
+  const { name, setName } = useUserStore();
+  return <input value={name} onChange={(e) => setName(e.target.value)} />;
 }
 
 function DebugPanel() {
-  // Lives outside the Screen but still sees the registry
+  // Lives outside the Screen but still sees the registry.
   const screens = useScreens();
   return <pre>{JSON.stringify(screens, null, 2)}</pre>;
 }
 ```
 
-## Concepts
+## What you get
 
-### Scope through ports
+- **`<Screen.System>`** — root provider; owns the registry + the store map.
+- **`<Screen id title>`** — addressable surface. Self-registers; participates in presence (CSS class + `--agent-color` var when `agentActivity` is set).
+- **`useRegisterStore(name, store)`** — attach a Zustand store to the enclosing `<Screen>` under `${screen.id}.${name}`.
+- **`useScreens()`** — agent-introspectable snapshot of every mounted Screen and the state of its registered stores.
+- **`<Screen schema={...}>` + `registerSchemaComponent`** — render an entire surface from an LLM-emitted JSON page description.
 
-State that should be visible across a screen's children — but not leak outward — lives in **ports**. Anything else stays local. Port keys are flat (`screenId.portName`) so a sibling can subscribe to another screen's port without prop-drilling:
+## Inertia.js
 
-```tsx
-const [dashFilter] = useScreenPort<string>("dashboard.filter");
-```
-
-Ports validate their writes with a duck-typed validator that natively understands a small schema language *and* accepts any object with `.parse(value)` — so Zod schemas drop in without an extra dependency.
-
-### Lifecycle (preview)
-
-A screen transitions through `mounting → loading → active → suspended → hibernated → restoring → active`. Today (0.2.x) only `mounting → active` is implemented; subsequent minors fill in the rest:
-
-| Version | Adds |
-|---------|------|
-| **0.2.x** | Port store + `<Screen>` JSX root + `<Screen.Port>` + `useScreenPort` + `useScreens` registry |
-| 0.3.x | Visibility detection + hibernation (unmount + snapshot + rehydrate) |
-| 0.4.x | Data-aware loading state + `<Screen.Loading>` + skeleton transitions |
-| 0.5.x | Layouts: `Screen.Group`, `Screen.Stack`, `Screen.Grid`, `Screen.Spotlight` |
-| 0.6.x | Schema-driven rendering + component registry + `@portName.path` reference resolver |
-| 0.7.x | URL sync + sessionStorage persistence + cmd+1..9 keyboard cycling |
-| 1.0.0 | Full v1 — all of the above stable |
-
-### The agent superpower
-
-`useScreens()` returns a typed, live snapshot of every mounted screen — its id, title, lifecycle, declared port names, and current port values. Call it from anywhere inside `<Screen.System>` and you have a structured introspection of the running app. An agent can:
-
-- Generate a schema-mode payload (in 0.6.x) without reading source
-- Decide whether to wake a hibernated screen vs. read its last-known snapshot
-- Build status bars, debug overlays, and feature-flag checks against the live registry
-
-## Inertia.js integration
-
-Using fancy-screens inside an Inertia app? Install [`@particle-academy/fancy-inertia`](https://github.com/Particle-Academy/fancy-inertia) — it solves the three integration concerns: `<Screen.System>` mounting at app-shell, port store persistence across navigation, and schema-driven page rendering directly from Inertia props (`<InertiaSchemaScreen />` reads `usePage().props.schema`). See [docs/Inertia.md](docs/Inertia.md) for patterns + [fancy-inertia docs/Recipes.md](https://github.com/Particle-Academy/fancy-inertia/blob/main/docs/Recipes.md) for end-to-end examples.
+Inside an Inertia app, mount `<Screen.System>` at app-shell level (the `@particle-academy/fancy-inertia` adapter's `<FancyAppRoot>` does this for you). The schema-driven mode pairs with Inertia props out of the box via `<InertiaSchemaScreen>`. See [docs/Inertia.md](docs/Inertia.md).
 
 ## Documentation
 
 | Topic | Description |
 |-------|-------------|
-| [Screen](docs/Screen.md) | Root component, lifecycle states, patterns for multi-screen apps |
-| [Ports](docs/Ports.md) | Declarative IO contract, validators, cross-screen reads |
-| [Registry](docs/Registry.md) | `useScreens()` and the introspection contract |
-| [Inertia](docs/Inertia.md) | Inertia.js integration patterns (via `@particle-academy/fancy-inertia`) |
-| [Publishing](docs/PUBLISHING.md) | Release process — OIDC trusted publisher |
+| [Screen](docs/Screen.md) | Root component + lifecycle |
+| [Stores](docs/Stores.md) | Zustand stores + `useRegisterStore` |
+| [SchemaMode](docs/SchemaMode.md) | Agent-emitted JSON UI |
+| [Registry](docs/Registry.md) | `useScreens()` introspection |
+| [Inertia](docs/Inertia.md) | Inertia.js patterns |
+| [Migration](docs/Migration.md) | Migrating from 0.3.x Ports |
 
 ## Status
 
-**v0.2.x — port store + Screen root + registry.** Production-usable for ports + introspection patterns. Hold off on heavy reliance on lifecycle until 0.3.x lands hibernation. The API surface for `<Screen>`, `<Screen.Port>`, `useScreenPort`, and `useScreens` is stable across the 0.x series.
+**v0.4.x — Zustand-based state + addressable screens + schema-driven mode + cross-surface presence.** Breaking change from 0.3.x: the Port system was removed; see [Migration.md](docs/Migration.md) for the mapping. The `<Screen>`, `<Screen.System>`, `useScreen()`, `useScreens()` APIs are stable across the 0.x series.
 
 ## License
 

@@ -1,8 +1,8 @@
 # Registry — `useScreens()`
 
-The agent-superpower hook. Returns a live, typed snapshot of every mounted `<Screen>` in the app — its identity, lifecycle, declared ports, and current port values.
+The agent-superpower hook. Returns a live, typed snapshot of every mounted `<Screen>` in the app — its identity, lifecycle, registered Zustand stores, and the current state of each.
 
-This is the single biggest reason to use `<Screen>` over a vanilla div: it makes the app **introspectable**. An agent (or a debug overlay, or a feature flag check) can ask "what's currently visible? what data does that screen consume?" without reading source.
+This is the single biggest reason to use `<Screen>` over a vanilla `<div>`: it makes the app **introspectable**. An agent (or a debug overlay, or a feature flag check) can ask "what's currently visible? what state does that screen hold?" without reading source.
 
 ## Import
 
@@ -23,30 +23,30 @@ function StatusBar() {
 }
 ```
 
-The hook can be called from anywhere inside `<Screen.System>` — including from components **outside** any `<Screen>`. That's how a global status bar / debug overlay / agent panel can observe the whole app.
+The hook can be called from anywhere inside `<Screen.System>` — including from components **outside** any `<Screen>`. That's how a global status bar / debug overlay / agent panel observes the whole app.
 
 ## Return shape
-
-`useScreens()` returns an array of objects with this shape:
 
 ```ts
 type ScreenInfo = {
   id: string;
   title?: string;
   lifecycle: "mounting" | "loading" | "active" | "suspended" | "hibernated" | "restoring";
-  ports: string[];                          // local port names declared by this screen
-  portValues: Record<string, unknown>;      // live values, keyed by local port name
-  lastActiveAt?: number;                    // wall-clock millis of last activation
+  storeKeys: string[];                       // names of Zustand stores registered to this screen
+  storeValues: Record<string, unknown>;      // snapshot of each store's state at call time
+  lastActiveAt?: number;                     // wall-clock millis of last activation
+  agentActivity?: AgentScreenActivity | null;
 };
 ```
 
 | Field | Why it matters for agents |
 |-------|--------------------------|
-| `id` | Stable identifier. Use this in cross-screen references (`useScreenPort("id.port")`). |
+| `id` | Stable identifier for cross-screen references. |
 | `title` | Human label. Show in UIs that list screens. |
-| `lifecycle` | What state the screen is in *right now*. Particularly important for hibernation in 0.3.x — agents can decide whether to wake a screen vs. read its snapshot. |
-| `ports` | Schema-shape: which inputs/outputs the screen exposes. Lets an agent generate a schema-mode payload without reading source. |
-| `portValues` | Live values. Lets an agent know what the user is currently looking at, what filters are applied, what's selected. |
+| `lifecycle` | What state the screen is in *right now*. |
+| `storeKeys` | Names of Zustand stores attached via `useRegisterStore`. |
+| `storeValues` | Current state for each store at the moment `useScreens()` was called. |
+| `agentActivity` | Most recent agent action targeting this screen (presence layer writes here). |
 
 ## Reactivity
 
@@ -54,11 +54,9 @@ type ScreenInfo = {
 
 - A screen mounts or unmounts
 - A screen's `title` changes
-- A port is declared or removed (changes `ports`)
-- A port value changes (changes `portValues`)
-- (0.3.x) A lifecycle transition
+- A store is registered or unregistered (changes `storeKeys`)
 
-The implementation reads the registry-version counter inside `<Screen.System>` plus subscribes to each port store key — the API stays the same; the runtime just gets fancier.
+It does **not** re-render on every Zustand `setState` — that would cascade into every consumer of `useScreens()` on high-frequency state changes. The `storeValues` you read are a snapshot at call time. If you need a re-render when a specific store mutates, subscribe to that store directly with its hook.
 
 ## Patterns
 
@@ -75,8 +73,6 @@ function ScreensDevtool() {
 }
 ```
 
-Drop this inside `<Screen.System>` next to your app for an always-on view of every screen's live state.
-
 ### Agent introspection prompt
 
 ```ts
@@ -87,16 +83,15 @@ You can drive the following screens:
 ${screens
   .map(
     (s) =>
-      `- ${s.id} (${s.title}): exposes ports [${s.ports.join(", ")}]; ` +
-      `currently lifecycle=${s.lifecycle}, values=${JSON.stringify(s.portValues)}`,
+      `- ${s.id} (${s.title}): stores [${s.storeKeys.join(", ")}]; ` +
+      `lifecycle=${s.lifecycle}; ` +
+      `state=${JSON.stringify(s.storeValues)}`,
   )
   .join("\n")}
-
-To act, write to a port: { screenId: "...", portName: "...", value: ... }
 `;
 ```
 
-The agent gets the running app's full IO surface as a structured JSON document — no source-code reading, no runtime mystery.
+The agent gets the running app's full state surface as a structured JSON document — no source-code reading, no DOM scraping.
 
 ### Feature flag
 
@@ -106,13 +101,14 @@ function useScreenIsOpen(id: string): boolean {
 }
 ```
 
-Build entitlement / progressive-disclosure logic on top of the registry without prop-drilling.
-
 ## Stability promise
 
-The shape of `ScreenInfo` is stable across the 0.x series. Fields will be **added** (e.g. `path` when URL sync ships in 0.7.x; `loading` when the loading layer ships in 0.4.x) but never removed. Code that reads `screens[i].id` today will keep working through 1.0.0.
+The shape of `ScreenInfo` is stable across the 0.x series. Fields will be **added** (e.g. `path` when URL sync ships; `loading` when the loading layer ships) but never removed. Code that reads `screens[i].id` today will keep working through 1.0.0.
+
+The 0.3 → 0.4 rename of `ports` / `portValues` → `storeKeys` / `storeValues` is the one breaking change in this surface — covered in [Migration.md](./Migration.md).
 
 ## See also
 
 - [Screen.md](./Screen.md) — the component that registers itself here
-- [Ports.md](./Ports.md) — what `ports` and `portValues` reflect
+- [Stores.md](./Stores.md) — what `storeKeys` and `storeValues` reflect
+- [Migration.md](./Migration.md) — 0.3 → 0.4 migration

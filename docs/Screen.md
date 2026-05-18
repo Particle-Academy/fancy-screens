@@ -1,11 +1,13 @@
 # Screen
 
-A **containerized application surface**. A `<Screen>` is bigger than a tab and smaller than a route — it owns its own state via typed [ports](./Ports.md), declares its identity to a global [registry](./Registry.md), and (in later 0.x releases) hibernates when off-view, syncs to the URL, and renders from a JSON schema.
+A **containerized application surface**. A `<Screen>` is bigger than a tab and smaller than a route — it declares its identity to a global [registry](./Registry.md), participates in cross-surface agent presence, and can render either as JSX or from an agent-emitted JSON schema.
+
+State management is **Zustand**. fancy-screens does not implement its own pub/sub store — you bring Zustand stores and register them with the enclosing Screen so they're enumerable by agents and presence layers.
 
 ## Import
 
 ```tsx
-import { Screen, useScreen } from "@particle-academy/fancy-screens";
+import { Screen, useScreen, useRegisterStore } from "@particle-academy/fancy-screens";
 ```
 
 ## Quick start
@@ -13,13 +15,18 @@ import { Screen, useScreen } from "@particle-academy/fancy-screens";
 Wrap your app in `<Screen.System>` once at the root, then drop one or more `<Screen>` components anywhere underneath:
 
 ```tsx
-import { Screen, useScreenPort } from "@particle-academy/fancy-screens";
+import { create } from "zustand";
+import { Screen, useRegisterStore } from "@particle-academy/fancy-screens";
+
+const useUserStore = create<{ name: string; setName: (n: string) => void }>((set) => ({
+  name: "",
+  setName: (name) => set({ name }),
+}));
 
 function App() {
   return (
     <Screen.System>
       <Screen id="profile" title="Profile">
-        <Screen.Port name="user" defaultValue={{ name: "" }} />
         <Screen.Body>
           <Form />
         </Screen.Body>
@@ -29,8 +36,9 @@ function App() {
 }
 
 function Form() {
-  const [user, setUser] = useScreenPort<{ name: string }>("user");
-  return <input value={user?.name} onChange={(e) => setUser({ name: e.target.value })} />;
+  useRegisterStore("user", useUserStore);
+  const { name, setName } = useUserStore();
+  return <input value={name} onChange={(e) => setName(e.target.value)} />;
 }
 ```
 
@@ -38,7 +46,7 @@ function Form() {
 
 ### `<Screen.System>` (root provider)
 
-Wrap your app once. Owns the global port store and the screen registry. Without it, every Screen + hook will throw.
+Wrap your app once. Owns the screen registry and the map of registered Zustand stores. Without it, every `<Screen>` and `useScreens()` call will throw.
 
 | Prop | Type | Description |
 |------|------|-------------|
@@ -50,23 +58,20 @@ Declares a containerized surface. Self-registers with the system on mount, unreg
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
-| `id` | `string` | yes | Globally unique. Doubles as the prefix for this screen's port keys (`${id}.${portName}`). |
+| `id` | `string` | yes | Globally unique. Doubles as the prefix for any stores you register inside (`${id}.${storeName}`). |
 | `title` | `string` | no | Human label surfaced via `useScreens()`. |
-| `children` | `ReactNode` | no | Typically a mix of `<Screen.Port>` (declarations) and one `<Screen.Body>` (visible content). |
+| `children` | `ReactNode` | no | The screen's content. Wins over `schema` when both are passed. |
+| `schema` | `ScreenSchema` | no | Agent-emitted JSON page description. See [SchemaMode.md](./SchemaMode.md). |
 | `className` | `string` | no | Forwarded to the wrapping `<div>`. |
 
 ### `<Screen.Body>`
 
-Wraps the visible content. In 0.2.x this is mostly a marker; in 0.3.x it becomes the boundary that gets unmounted on hibernation. Use it now so future minors don't require migration.
+Wraps the visible content. Today this is mostly a marker; in later minors it becomes the boundary that gets unmounted on hibernation. Use it now so future minors don't require migration.
 
 | Prop | Type | Description |
 |------|------|-------------|
 | `children` | `ReactNode` | The screen's renderable content. |
 | `className` | `string` | Forwarded to the wrapping `<div>`. |
-
-### `<Screen.Port>`
-
-Declarative port. Renders nothing — its only job is to declare a port to the store on mount and tear it down on unmount. See [Ports.md](./Ports.md) for the full contract.
 
 ## Hooks
 
@@ -82,46 +87,57 @@ const { id, title, lifecycle } = useScreen();
 |-------|------|-------------|
 | `id` | `string` | The Screen's `id` prop. |
 | `title` | `string \| undefined` | The Screen's `title` prop. |
-| `lifecycle` | `"mounting" \| "loading" \| "active" \| "suspended" \| "hibernated" \| "restoring"` | Current state. 0.2.x always reports `"active"`; later minors fill in the rest. |
+| `lifecycle` | `ScreenLifecycle` | Current state. Today always `"active"`. |
 
-## Lifecycle (preview)
+### `useRegisterStore(name, store)`
 
-The full lifecycle ships across 0.x releases. Today (0.2.x) the state machine is stubbed at `"active"`:
-
-| State | Lands in | Means |
-|-------|----------|-------|
-| `mounting` | 0.3.x | First render; ports declared, store initialized. |
-| `loading`  | 0.4.x | At least one port has `loading: true`. |
-| `active`   | 0.2.x | Visible + ports resolved + receiving events. |
-| `suspended`| 0.3.x | Off-view but in DOM (200 ms grace before hibernation). |
-| `hibernated`| 0.3.x | Past `hibernateAfter` (default 30 s); unmounted, snapshot kept. |
-| `restoring`| 0.3.x | Re-rendering from JSX/schema; replaying the snapshot. |
-
-## Patterns
-
-**Multiple screens on one page** — drop them anywhere. Each gets its own scope:
+Register a Zustand store with the enclosing `<Screen>`. See [Stores.md](./Stores.md).
 
 ```tsx
-<Screen.System>
-  <header>…</header>
-  <Screen id="left">  <Screen.Body>…</Screen.Body> </Screen>
-  <Screen id="right"> <Screen.Body>…</Screen.Body> </Screen>
-</Screen.System>
-```
+const useUserStore = create<UserState>((set) => ({ ... }));
 
-**Cross-screen reads** — port keys are flat (`screenId.portName`), so a hook can subscribe to a sibling's port directly. Useful for dashboards where one screen filters and others react:
-
-```tsx
-function ReportsScreen() {
-  const [filter] = useScreenPort<string>("dashboard.filter");
-  return <Reports filter={filter} />;
+function Form() {
+  useRegisterStore("user", useUserStore);
+  // ...
 }
 ```
 
-**Agent introspection** — call `useScreens()` from any component (even one outside any screen) to get a typed snapshot of the running app. See [Registry.md](./Registry.md).
+After this, `useScreens()` will see the store under the key `${screen.id}.user`, and agent-integrations' bridges can read or mutate state via `store.getState()` / `store.setState()`.
+
+### `useScreens()`
+
+Snapshot of every mounted Screen + its registered stores' current state. The agent-superpower hook. See [Registry.md](./Registry.md).
+
+## Schema-driven mode (agent-emit JSON UI)
+
+```tsx
+import { Screen, registerSchemaComponent } from "@particle-academy/fancy-screens";
+import { Card, Action } from "@particle-academy/react-fancy";
+
+registerSchemaComponent("Card", Card);
+registerSchemaComponent("Card.Body", Card.Body);
+registerSchemaComponent("Action", Action);
+
+const schema = {
+  type: "Card",
+  children: [{
+    type: "Card.Body",
+    children: [
+      "Pro plan",
+      { type: "Action", props: { color: "violet" }, children: ["Subscribe"] },
+    ],
+  }],
+};
+
+<Screen id="pricing" schema={schema} />
+```
+
+The schema is intentionally LLM-friendly — arrays of objects, primitives, simple discriminated unions. See [SchemaMode.md](./SchemaMode.md) for the "agent emits a page" pattern.
 
 ## See also
 
-- [Ports.md](./Ports.md) — declarative IO contract; how data crosses the boundary
+- [Stores.md](./Stores.md) — registering Zustand stores with a Screen
 - [Registry.md](./Registry.md) — `useScreens()`, the agent-superpower hook
-- [PUBLISHING.md](./PUBLISHING.md) — release process for this package
+- [SchemaMode.md](./SchemaMode.md) — agent-emitted JSON UI
+- [Inertia.md](./Inertia.md) — patterns for Inertia.js apps
+- [Migration.md](./Migration.md) — migrating from 0.3.x (Ports → Zustand)

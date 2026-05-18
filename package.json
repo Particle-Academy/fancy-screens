@@ -1,7 +1,7 @@
 {
   "name": "@particle-academy/fancy-screens",
-  "version": "0.3.0",
-  "description": "Containerized application surface for fancy components — scoped state, typed ports, hibernation, schema-driven rendering, and an agent-introspectable registry.",
+  "version": "0.4.0",
+  "description": "Cross-surface coordination layer for Human+ apps — a screen registry, agent-presence rendering, schema-driven mode, and Zustand-store registration so agents can introspect and operate any surface.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Particle-Academy/fancy-screens.git"
@@ -40,19 +40,23 @@
     "react",
     "screen",
     "app-shell",
-    "ports",
-    "hibernation",
+    "zustand",
     "schema",
     "agent",
+    "human-plus-ux",
     "particle-academy"
   ],
   "peerDependencies": {
+    "@particle-academy/react-fancy": "^3.0.0",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
-    "@particle-academy/react-fancy": "^3.0.0"
+    "zustand": "^5.0.13"
   },
   "peerDependenciesMeta": {
     "@particle-academy/react-fancy": {
+      "optional": true
+    },
+    "zustand": {
       "optional": true
     }
   },
@@ -63,7 +67,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tsup": "^8.5.0",
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.0",
+    "zustand": "^5.0.13"
   },
   "publishConfig": {
     "access": "public"

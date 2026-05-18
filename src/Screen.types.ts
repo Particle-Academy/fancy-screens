@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
+import type { StoreApi } from "zustand";
 
 /**
- * Lifecycle of a Screen. 0.2.x only emits "mounting" and "active".
- * "loading", "suspended", "hibernated", "restoring" land in subsequent
- * minors as the runtime fills out.
+ * Lifecycle of a Screen. Today only "active" is emitted; "loading",
+ * "suspended", "hibernated", "restoring" land in subsequent minors as
+ * the runtime fills out.
  */
 export type ScreenLifecycle =
   | "mounting"
@@ -13,55 +14,18 @@ export type ScreenLifecycle =
   | "hibernated"
   | "restoring";
 
-/** Direction of data flow across a port. */
-export type PortDirection = "in" | "out" | "inout";
-
-/**
- * A duck-typed validator. Accepts anything with a `.parse(value)` method
- * (Zod schemas, native validators, custom shapes) plus our built-in
- * descriptive forms. See validate.ts for the resolver.
- */
-export type PortSchema =
-  | { kind: "string"; min?: number; max?: number }
-  | { kind: "number"; min?: number; max?: number }
-  | { kind: "boolean" }
-  | { kind: "any" }
-  | { kind: "array"; of: PortSchema }
-  | { kind: "object"; shape: Record<string, PortSchema | string> }
-  // Duck-typed: anything with `.parse(value)` (e.g. Zod) is honored.
-  | { parse: (value: unknown) => unknown };
-
-/** Live state of a port — the unit observed by useScreenPort consumers. */
-export interface PortState<T = unknown> {
-  value: T | undefined;
-  loading: boolean;
-  error: Error | null;
-  /** Bumped on every successful write — useful for forcing re-render keys. */
-  version: number;
-}
-
-/** Stored port descriptor inside the global PortStore. */
-export interface PortRecord<T = unknown> {
-  state: PortState<T>;
-  schema?: PortSchema;
-  direction: PortDirection;
-  /** Optional per-port default seeded at <Screen.Port> declaration. */
-  defaultValue?: T;
-}
-
 export interface ScreenMeta {
   id: string;
   title?: string;
   lifecycle: ScreenLifecycle;
-  /** Port names declared by this screen (without the screenId prefix). */
-  ports: string[];
+  /** Names of stores registered for this screen (without screenId prefix). */
+  storeKeys: string[];
   /** Wall-clock millis of the last visibility-change to "active". */
   lastActiveAt?: number;
   /**
    * Most recent agent activity targeting this screen. Set by the host's
-   * agent-integrations layer (see `AgentScreensBridge` / `useAgentActivity`)
-   * — fancy-screens doesn't import that package, just stores the value.
-   * `null` when no agent is currently active on the screen.
+   * agent-integrations layer — fancy-screens doesn't import that package,
+   * just stores the value. `null` when no agent is currently active.
    */
   agentActivity?: AgentScreenActivity | null;
 }
@@ -69,7 +33,7 @@ export interface ScreenMeta {
 /**
  * Loose shape of an agent presence update written into ScreenMeta. Mirrors
  * the `AgentActivity` from `@particle-academy/agent-integrations` but kept
- * loose here so fancy-screens stays dep-free.
+ * loose here so fancy-screens stays dep-free of that package.
  */
 export interface AgentScreenActivity {
   agentId: string;
@@ -84,12 +48,18 @@ export interface AgentScreenActivity {
 }
 
 export interface ScreenProps {
-  /** Globally unique screen id. Doubles as the port-key prefix. */
+  /** Globally unique screen id. Doubles as the store-key prefix. */
   id: string;
   /** Optional human title — surfaced via useScreens(). */
   title?: string;
-  /** JSX children OR omit and pass `schema` (later minors). */
+  /** JSX children OR omit and pass `schema` for schema-driven mode. */
   children?: ReactNode;
+  /**
+   * Schema-driven mode. Pass a JSON description (typically agent-emitted)
+   * and the Screen renders it via the component registry. When both
+   * `schema` and `children` are provided, `children` wins.
+   */
+  schema?: ScreenSchema;
   className?: string;
 }
 
@@ -98,15 +68,33 @@ export interface ScreenBodyProps {
   className?: string;
 }
 
-export interface ScreenPortProps<T = unknown> {
-  /** Local port name. Stored as `${screenId}.${name}`. */
-  name: string;
-  direction?: PortDirection;
-  schema?: PortSchema;
-  /** Initial value if the port hasn't been written yet. */
-  defaultValue?: T;
-}
-
 export interface ScreenSystemProps {
   children?: ReactNode;
 }
+
+/**
+ * JSON page description consumed by `<Screen schema={...}>`. The schema is
+ * intentionally LLM-friendly: arrays of objects, primitives, simple
+ * discriminated unions. The component registry maps `type` to a React
+ * component; `props` get spread; `children` recurse.
+ *
+ * This is the Human+ UX surface where an agent emits an entire UI as JSON
+ * and the client renders it without per-page glue code.
+ */
+export interface ScreenSchema {
+  /** Component name registered via {@link registerSchemaComponent}. */
+  type: string;
+  /** Props passed through to the component. */
+  props?: Record<string, unknown>;
+  /** Either nested schemas or literal strings. */
+  children?: Array<ScreenSchema | string>;
+}
+
+/**
+ * A registered Zustand store, tracked in the screen system so agents and
+ * presence layers can enumerate per-screen state without prop drilling.
+ *
+ * The store value is whatever `zustand.createStore(...)` returns — we keep
+ * it loosely typed here since each store has its own state shape.
+ */
+export type RegisteredStore = StoreApi<unknown>;

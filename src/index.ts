@@ -1,32 +1,41 @@
 /**
  * @particle-academy/fancy-screens
  *
- * Containerized application surface for fancy components.
+ * Cross-surface coordination layer for Human+ apps. Provides:
+ *   - <Screen> + <Screen.System> — addressable surfaces + a global registry
+ *   - useScreens() — agent-introspectable list of every mounted surface
+ *   - useRegisterStore() — attach a Zustand store to the enclosing <Screen>
+ *   - <Screen schema={...}> + registerSchemaComponent — agent-emitted JSON UI
  *
- * v0.2.x — port store + <Screen> JSX-mode root + <Screen.Port> +
- * useScreenPort() + <Screen.System> + useScreens() registry hook.
+ * State management is Zustand. fancy-screens DOES NOT implement its own
+ * pub/sub store anymore — it tracks the Zustand stores you bring so they're
+ * enumerable from the screen registry. See /docs/human-plus-ux for the
+ * "agent emits a page" walkthrough.
  *
- * See https://github.com/Particle-Academy/fancy-screens for the layer
- * roadmap (lifecycle, hibernation, loading, layouts, schema, URL sync).
+ * Migrating from 0.3.x (Ports → Zustand): the docs include a migration map.
  */
 
 export { Screen } from "./Screen";
 export { ScreenSystem } from "./ScreenSystem";
 export { useScreen } from "./Screen.context";
-export { useScreenPort } from "./ports/usePort";
 export { useScreens } from "./registry/useScreens";
-export { useScreenSystem } from "./ports/PortStore.context";
+export { useScreenSystem } from "./ScreenSystem.context";
+export { useRegisterStore } from "./useRegisterStore";
+export {
+  registerSchemaComponent,
+  registerSchemaComponents,
+  unregisterSchemaComponent,
+  listSchemaComponents,
+  renderSchema,
+} from "./schema";
 
 export type {
   ScreenProps,
   ScreenBodyProps,
-  ScreenPortProps,
   ScreenLifecycle,
   ScreenMeta,
   ScreenSystemProps,
+  ScreenSchema,
   AgentScreenActivity,
-  PortDirection,
-  PortSchema,
-  PortState,
-  PortRecord,
+  RegisteredStore,
 } from "./Screen.types";
