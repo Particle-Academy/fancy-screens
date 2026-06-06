@@ -1,5 +1,7 @@
 # @particle-academy/fancy-screens
 
+[![Fancified](art/fancified.svg)](https://particle.academy)
+
 **Cross-surface coordination for Human+ apps.** A `<Screen>` is a scoped, addressable application surface — bigger than a tab, smaller than a route. It registers with a global system so agents and presence layers can enumerate and target it, owns its own state (via Zustand stores you bring), and can render either as JSX or from an agent-emitted JSON schema.
 
 ## Why
