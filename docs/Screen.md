@@ -112,11 +112,11 @@ Snapshot of every mounted Screen + its registered stores' current state. The age
 
 ```tsx
 import { Screen, registerSchemaComponent } from "@particle-academy/fancy-screens";
-import { Card, Action } from "@particle-academy/react-fancy";
+import { Card, Button } from "@particle-academy/react-fancy";
 
 registerSchemaComponent("Card", Card);
 registerSchemaComponent("Card.Body", Card.Body);
-registerSchemaComponent("Action", Action);
+registerSchemaComponent("Button", Button);
 
 const schema = {
   type: "Card",
@@ -124,7 +124,7 @@ const schema = {
     type: "Card.Body",
     children: [
       "Pro plan",
-      { type: "Action", props: { color: "violet" }, children: ["Subscribe"] },
+      { type: "Button", props: { color: "violet" }, children: ["Subscribe"] },
     ],
   }],
 };

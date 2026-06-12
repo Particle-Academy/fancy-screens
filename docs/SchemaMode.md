@@ -20,14 +20,14 @@ That's the whole grammar.
 
 ```tsx
 import { registerSchemaComponent, registerSchemaComponents } from "@particle-academy/fancy-screens";
-import { Card, Action, Heading, Text } from "@particle-academy/react-fancy";
+import { Card, Button, Heading, Text } from "@particle-academy/react-fancy";
 
 registerSchemaComponents({
   "Card": Card,
   "Card.Header": Card.Header,
   "Card.Body": Card.Body,
   "Card.Footer": Card.Footer,
-  "Action": Action,
+  "Button": Button,
   "Heading": Heading,
   "Text": Text,
 });
@@ -46,7 +46,7 @@ const schema = {
     children: [
       { type: "Heading", props: { level: 3 }, children: ["Pro plan"] },
       { type: "Text", children: ["$29/mo. All features unlocked."] },
-      { type: "Action", props: { color: "violet" }, children: ["Subscribe"] },
+      { type: "Button", props: { color: "violet" }, children: ["Subscribe"] },
     ],
   }],
 };
