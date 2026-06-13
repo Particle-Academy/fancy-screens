@@ -95,3 +95,9 @@ Inside an Inertia app, mount `<Screen.System>` at app-shell level (the `@particl
 ## License
 
 MIT
+
+---
+
+## ⭐ Star Fancy UI
+
+If this package is useful to you, a quick ⭐ on the repo really helps us build a better kit. Thank you!
