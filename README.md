@@ -34,6 +34,7 @@ import {
   Screen,
   useRegisterStore,
   useScreens,
+  ScreenSwitcher,
 } from "@particle-academy/fancy-screens";
 
 const useUserStore = create<{ name: string; setName: (n: string) => void }>((set) => ({
@@ -71,6 +72,34 @@ function DebugPanel() {
 - **`<Screen id title>`** — addressable surface. Self-registers; participates in presence (CSS class + `--agent-color` var when `agentActivity` is set).
 - **`useRegisterStore(name, store)`** — attach a Zustand store to the enclosing `<Screen>` under `${screen.id}.${name}`.
 - **`useScreens()`** — agent-introspectable snapshot of every mounted Screen and the state of its registered stores.
+- **`<ScreenSwitcher>`** — reusable tabs or thumbnails over `useScreens()`, with controlled/uncontrolled selection and stable agent handles.
+
+### Screen switcher
+
+```tsx
+import { ScreenSwitcher } from "@particle-academy/fancy-screens";
+import { FauxClientScreenThumbnail } from "@particle-academy/fancy-screens/react-fancy";
+
+<ScreenSwitcher
+  activeId={activeId}
+  onSelect={setActiveId}
+  onClose={removeScreen}
+  mode="thumbnails"
+  thumbnailVariant="browser"
+  thumbnailFrame={FauxClientScreenThumbnail}
+  renderThumbnail={(screen) => previews[screen.id]}
+/>;
+```
+
+`ScreenSwitcher` reads the enclosing `Screen.System` registry by default. Pass
+`screens` to enrich entries with `kind`, thumbnail content, or per-screen
+affordance labels. `showHeader={false}` hides the built-in header; `header`
+replaces it with a node or render function.
+
+The main entrypoint never imports the optional `react-fancy` peer. Thumbnail
+mode falls back to a dependency-free frame; applications that install
+`@particle-academy/react-fancy` can opt into its real `FauxClient` through the
+`/react-fancy` adapter shown above.
 - **`<Screen schema={...}>` + `registerSchemaComponent`** — render an entire surface from an LLM-emitted JSON page description.
 
 ## Inertia.js

@@ -1,7 +1,7 @@
 {
   "name": "@particle-academy/fancy-screens",
-  "version": "0.4.3",
-  "description": "Cross-surface coordination layer for Human+ apps \u2014 a screen registry, agent-presence rendering, schema-driven mode, and Zustand-store registration so agents can introspect and operate any surface.",
+  "version": "0.5.0",
+  "description": "Cross-surface coordination layer for Human+ apps — a screen registry, agent-presence rendering, schema-driven mode, and Zustand-store registration so agents can introspect and operate any surface.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Particle-Academy/fancy-screens.git"
@@ -22,6 +22,16 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./react-fancy": {
+      "import": {
+        "types": "./dist/react-fancy.d.ts",
+        "default": "./dist/react-fancy.js"
+      },
+      "require": {
+        "types": "./dist/react-fancy.d.cts",
+        "default": "./dist/react-fancy.cjs"
+      }
     }
   },
   "files": [
@@ -33,6 +43,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "lint": "tsc --noEmit",
+    "test": "npm run build && node --test tests/*.test.mjs",
     "clean": "rm -rf dist",
     "prepublishOnly": "tsup"
   },

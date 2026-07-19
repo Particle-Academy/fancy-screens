@@ -4,6 +4,15 @@ All notable changes to `@particle-academy/fancy-screens` will be documented in t
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/), and this project follows [Semantic Versioning](https://semver.org/) — though the 0.x series is explicit about which layer of the runtime each minor adds.
 
+## [0.5.0] — 2026-07-18
+
+### Added
+
+- `ScreenSwitcher` with controlled or uncontrolled selection, a replaceable or
+  hideable header, stable per-screen action handles, and tab/thumbnail modes.
+- Optional `fancy-screens/react-fancy` adapter for real `FauxClient` thumbnails
+  while keeping the main entrypoint safe when react-fancy is absent.
+
 ## [0.2.1] — 2026-05-03
 
 ### Added

@@ -1,7 +1,10 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: {
+    index: "src/index.ts",
+    "react-fancy": "src/react-fancy.tsx",
+  },
   format: ["esm", "cjs"],
   dts: true,
   sourcemap: true,

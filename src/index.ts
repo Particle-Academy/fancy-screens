@@ -21,6 +21,7 @@ export { useScreen } from "./Screen.context";
 export { useScreens } from "./registry/useScreens";
 export { useScreenSystem } from "./ScreenSystem.context";
 export { useRegisterStore } from "./useRegisterStore";
+export { ScreenSwitcher } from "./ScreenSwitcher";
 export {
   registerSchemaComponent,
   registerSchemaComponents,
@@ -39,3 +40,11 @@ export type {
   AgentScreenActivity,
   RegisteredStore,
 } from "./Screen.types";
+export type {
+  ScreenSwitcherProps,
+  ScreenSwitcherItem,
+  ScreenSwitcherAffordances,
+  ScreenSwitcherHeaderContext,
+  ScreenThumbnailFrameProps,
+  ScreenThumbnailVariant,
+} from "./ScreenSwitcher";
