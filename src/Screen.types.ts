@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { StoreApi } from "zustand";
+import type { ScreenDoc } from "./doc";
 
 /**
  * Lifecycle of a Screen. Today only "active" is emitted; "loading",
@@ -60,6 +61,15 @@ export interface ScreenProps {
    * `schema` and `children` are provided, `children` wins.
    */
   schema?: ScreenSchema;
+  /**
+   * Document-driven mode. Pass a `DocTree` (fancy-doc-commons) — the flat,
+   * addressable form of the same content.
+   *
+   * Takes precedence over `schema`: a document with node ids is the more
+   * specific thing to have been handed, so if a caller has both, the
+   * addressable one is the one they mean.
+   */
+  doc?: ScreenDoc;
   className?: string;
 }
 
@@ -82,6 +92,21 @@ export interface ScreenSystemProps {
  * and the client renders it without per-page glue code.
  */
 export interface ScreenSchema {
+  /**
+   * Stable handle for this node. **Supply it for anything an agent should be
+   * able to address afterwards.**
+   *
+   * Optional, because nested JSON with no id bookkeeping is what a model emits
+   * reliably — requiring ids would make the common case worse. But a node
+   * without one cannot be addressed after render: the conversion to a flat
+   * document mints a position-derived id and flags it `synthetic`, and a bridge
+   * will not hand a synthetic id out as a durable handle, because inserting a
+   * sibling above it silently repoints it at a different node.
+   *
+   * In short: no id is fine for static content, and required for anything an
+   * agent is meant to drive.
+   */
+  id?: string;
   /** Component name registered via {@link registerSchemaComponent}. */
   type: string;
   /** Props passed through to the component. */

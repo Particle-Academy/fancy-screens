@@ -3,6 +3,7 @@ import { ScreenContext, type ScreenContextValue } from "./Screen.context";
 import { useScreenSystem } from "./ScreenSystem.context";
 import { ScreenSystem } from "./ScreenSystem";
 import { renderSchema } from "./schema";
+import { fromDocTree } from "./doc";
 import type { ScreenBodyProps, ScreenProps } from "./Screen.types";
 
 function ScreenBody({ children, className }: ScreenBodyProps) {
@@ -21,7 +22,7 @@ ScreenBody.displayName = "Screen.Body";
  *
  * Children win if both are provided.
  */
-function ScreenRoot({ id, title, children, schema, className }: ScreenProps) {
+function ScreenRoot({ id, title, children, schema, doc, className }: ScreenProps) {
   const system = useScreenSystem();
 
   useEffect(() => {
@@ -62,7 +63,12 @@ function ScreenRoot({ id, title, children, schema, className }: ScreenProps) {
     ? ({ ["--agent-color" as unknown as keyof CSSProperties]: agentActivity.agentColor } as CSSProperties)
     : undefined;
 
-  const body = children ?? (schema ? renderSchema(schema) : null);
+  // Both paths land on renderSchema, because DocNode.type and ScreenSchema.type
+  // are the same string resolved against the same component registry. That is
+  // why every /screens adapter keeps working untouched — the registry was never
+  // the fragmented part; the tree around it was.
+  const body =
+    children ?? (doc ? renderSchema(fromDocTree(doc)) : schema ? renderSchema(schema) : null);
 
   return (
     <ScreenContext.Provider value={ctx}>

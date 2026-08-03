@@ -4,6 +4,56 @@ All notable changes to `@particle-academy/fancy-screens` will be documented in t
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/), and this project follows [Semantic Versioning](https://semver.org/) — though the 0.x series is explicit about which layer of the runtime each minor adds.
 
+## [0.6.0] — 2026-08-02
+
+The document-substrate half of the screens/CMS reconciliation. Everything here
+is **additive** — `schema` behaves exactly as before.
+
+### Added
+
+- **`toDocTree()` / `fromDocTree()`** — lossless conversion between
+  `ScreenSchema` and a `fancy-doc-commons` `DocTree`.
+
+  They are one model in two normal forms, not two models: nested JSON is what an
+  agent should *emit* (terse, no id bookkeeping, what a model produces
+  reliably), and flat-with-ids is what a runtime should *hold* (addressable,
+  patchable, mergeable). Round-trip identity is proven over ten fixtures
+  covering nesting, sibling order, literal text, text interleaved with elements,
+  authored ids, partially-authored ids and depth.
+
+  A literal string child becomes a node of reserved type `#text` rather than a
+  prop — a string and an element can be siblings, so folding text into a prop
+  loses their relative order.
+
+- **`<Screen doc={…}>`** — render a `DocTree` directly. Takes precedence over
+  `schema`; `children` still wins over both. Both props reach the same output,
+  which is asserted: `DocNode.type` and `ScreenSchema.type` are the same string
+  resolved against the same component registry, so **every `/screens` adapter
+  keeps working untouched** — the registry was never the fragmented part, the
+  tree around it was.
+
+- **Optional `id` on `ScreenSchema`**, plus `addressableIds()`.
+
+  Supply an `id` for anything an agent should be able to address after render.
+  A node without one gets a position-derived id flagged `synthetic`, and
+  `addressableIds()` returns **only** the authored ones.
+
+  That distinction is the point rather than a detail: a position-derived id
+  silently repoints at a different node when a sibling is inserted above it, so
+  handing one to an agent as a durable handle looks more useful and is actively
+  wrong. There is a test that demonstrates the repointing, so the reasoning
+  survives the next refactor.
+
+  **What you must DO: nothing.** `id` is optional and existing schemas are
+  unchanged. But an agent-driven surface should start supplying ids — that is
+  what makes a rendered screen drivable, and its absence is why this was a
+  standing violation of the component contract's stable-handles requirement.
+
+### Changed
+
+- `@particle-academy/fancy-doc-commons` is now a dependency (`>=0.1 <2.0`). It
+  is a pure, dependency-free core — no React, no runtime weight.
+
 ## [0.5.0] — 2026-07-18
 
 ### Added

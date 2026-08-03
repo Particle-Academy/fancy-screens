@@ -48,3 +48,8 @@ export type {
   ScreenThumbnailFrameProps,
   ScreenThumbnailVariant,
 } from "./ScreenSwitcher";
+
+// Document form — the flat, addressable normal form of a ScreenSchema.
+// See .ai/plans/screens-cms-schema-reconciliation.md in the envelope.
+export { toDocTree, fromDocTree, addressableIds, TEXT_NODE_TYPE } from "./doc";
+export type { ScreenDoc, ScreenDocNode, ToDocTreeOptions } from "./doc";

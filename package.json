@@ -1,94 +1,97 @@
 {
-  "name": "@particle-academy/fancy-screens",
-  "version": "0.5.0",
-  "description": "Cross-surface coordination layer for Human+ apps \u2014 a screen registry, agent-presence rendering, schema-driven mode, and Zustand-store registration so agents can introspect and operate any surface.",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Particle-Academy/fancy-screens.git"
-  },
-  "homepage": "https://github.com/Particle-Academy/fancy-screens#readme",
-  "bugs": "https://github.com/Particle-Academy/fancy-screens/issues",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
-      }
+    "name": "@particle-academy/fancy-screens",
+    "version": "0.6.0",
+    "description": "Cross-surface coordination layer for Human+ apps — a screen registry, agent-presence rendering, schema-driven mode, and Zustand-store registration so agents can introspect and operate any surface.",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Particle-Academy/fancy-screens.git"
     },
-    "./react-fancy": {
-      "import": {
-        "types": "./dist/react-fancy.d.ts",
-        "default": "./dist/react-fancy.js"
-      },
-      "require": {
-        "types": "./dist/react-fancy.d.cts",
-        "default": "./dist/react-fancy.cjs"
-      }
-    }
-  },
-  "files": [
-    "dist",
-    "docs",
-    "README.md"
-  ],
-  "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "lint": "tsc --noEmit && eslint .",
-    "test": "npm run build && node --test tests/*.test.mjs",
-    "clean": "rm -rf dist",
-    "prepublishOnly": "tsup"
-  },
-  "keywords": [
-    "react",
-    "screen",
-    "app-shell",
-    "zustand",
-    "schema",
-    "agent",
-    "human-plus-ux",
-    "particle-academy"
-  ],
-  "peerDependencies": {
-    "@particle-academy/react-fancy": ">=3",
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0",
-    "zustand": "^4.4.0 || ^5.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@particle-academy/react-fancy": {
-      "optional": true
+    "homepage": "https://github.com/Particle-Academy/fancy-screens#readme",
+    "bugs": "https://github.com/Particle-Academy/fancy-screens/issues",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "default": "./dist/index.cjs"
+            }
+        },
+        "./react-fancy": {
+            "import": {
+                "types": "./dist/react-fancy.d.ts",
+                "default": "./dist/react-fancy.js"
+            },
+            "require": {
+                "types": "./dist/react-fancy.d.cts",
+                "default": "./dist/react-fancy.cjs"
+            }
+        }
     },
-    "zustand": {
-      "optional": true
+    "files": [
+        "dist",
+        "docs",
+        "README.md"
+    ],
+    "scripts": {
+        "build": "tsup",
+        "dev": "tsup --watch",
+        "lint": "tsc --noEmit && eslint .",
+        "test": "npm run build && node --test tests/*.test.mjs",
+        "clean": "rm -rf dist",
+        "prepublishOnly": "tsup"
+    },
+    "keywords": [
+        "react",
+        "screen",
+        "app-shell",
+        "zustand",
+        "schema",
+        "agent",
+        "human-plus-ux",
+        "particle-academy"
+    ],
+    "peerDependencies": {
+        "@particle-academy/react-fancy": ">=3",
+        "react": "^18.0.0 || ^19.0.0",
+        "react-dom": "^18.0.0 || ^19.0.0",
+        "zustand": "^4.4.0 || ^5.0.0"
+    },
+    "peerDependenciesMeta": {
+        "@particle-academy/react-fancy": {
+            "optional": true
+        },
+        "zustand": {
+            "optional": true
+        }
+    },
+    "devDependencies": {
+        "@particle-academy/react-fancy": "^4.0.0",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "eslint": "^10.8.0",
+        "eslint-plugin-react-hooks": "^7.1.1",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "tsup": "^8.5.0",
+        "typescript": "^5.8.0",
+        "typescript-eslint": "^8.65.0",
+        "zustand": "^5.0.13"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "license": "MIT",
+    "overrides": {
+        "esbuild": "^0.28.1"
+    },
+    "dependencies": {
+        "@particle-academy/fancy-doc-commons": ">=0.1 <2.0"
     }
-  },
-  "devDependencies": {
-    "@particle-academy/react-fancy": "^4.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "eslint": "^10.8.0",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "tsup": "^8.5.0",
-    "typescript": "^5.8.0",
-    "typescript-eslint": "^8.65.0",
-    "zustand": "^5.0.13"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "license": "MIT",
-  "overrides": {
-    "esbuild": "^0.28.1"
-  }
 }
