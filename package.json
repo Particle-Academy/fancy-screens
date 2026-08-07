@@ -1,6 +1,6 @@
 {
     "name": "@particle-academy/fancy-screens",
-    "version": "0.6.0",
+    "version": "0.7.0",
     "description": "Cross-surface coordination layer for Human+ apps — a screen registry, agent-presence rendering, schema-driven mode, and Zustand-store registration so agents can introspect and operate any surface.",
     "repository": {
         "type": "git",
@@ -59,8 +59,8 @@
     ],
     "peerDependencies": {
         "@particle-academy/react-fancy": ">=3",
-        "react": "^18.0.0 || ^19.0.0",
-        "react-dom": "^18.0.0 || ^19.0.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
         "zustand": "^4.4.0 || ^5.0.0"
     },
     "peerDependenciesMeta": {
@@ -73,12 +73,12 @@
     },
     "devDependencies": {
         "@particle-academy/react-fancy": "^4.0.0",
-        "@types/react": "^19.0.0",
-        "@types/react-dom": "^19.0.0",
+        "@types/react": "^19.2.0",
+        "@types/react-dom": "^19.2.0",
         "eslint": "^10.8.0",
         "eslint-plugin-react-hooks": "^7.1.1",
-        "react": "^19.0.0",
-        "react-dom": "^19.0.0",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
         "tsup": "^8.5.0",
         "typescript": "^5.8.0",
         "typescript-eslint": "^8.65.0",
@@ -93,5 +93,8 @@
     },
     "dependencies": {
         "@particle-academy/fancy-doc-commons": ">=0.1 <2.0"
+    },
+    "engines": {
+        "node": ">=22"
     }
 }
