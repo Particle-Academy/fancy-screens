@@ -4,6 +4,20 @@ All notable changes to `@particle-academy/fancy-screens` will be documented in t
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/), and this project follows [Semantic Versioning](https://semver.org/) — though the 0.x series is explicit about which layer of the runtime each minor adds.
 
+## [0.7.1] — 2026-08-09
+
+### Added
+
+- **Asserts `fancy-doc-commons`' `CANONICAL_WALKS`** — the shared fixture
+  `fancy-cms-ui` asserts too, so both surfaces are checked against the same tree
+  rather than each being inspected separately. A fixture only one consumer
+  checks proves nothing; the point is that a bridge can hand a document from one
+  surface to the other and get the same shape back.
+
+### Changed
+
+- `@particle-academy/fancy-doc-commons` to `>=0.4 <2.0`.
+
 ## [0.7.0] — 2026-08-07
 
 ### Changed
