@@ -22,7 +22,7 @@ npm install @particle-academy/fancy-screens zustand
 ```
 
 **Peer dependencies (all optional):**
-- `react >= 18`, `react-dom >= 18`
+- `react ^19.0.0`, `react-dom ^19.0.0`
 - `zustand ^4.4 || ^5` — bring your own state primitive
 - `@particle-academy/react-fancy >= 3` — only if you render its components inside screens or schemas
 
