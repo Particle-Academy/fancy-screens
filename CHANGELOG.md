@@ -4,6 +4,12 @@ All notable changes to `@particle-academy/fancy-screens` will be documented in t
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/), and this project follows [Semantic Versioning](https://semver.org/) — though the 0.x series is explicit about which layer of the runtime each minor adds.
 
+## [Unreleased]
+
+### Fixed
+
+- **`CHANGELOG.md` is now in the published tarball.** `files` did not whitelist it, so npm never shipped it — and this package puts breaking changes in MINOR releases and tells you in the README to read the entry before taking one. The instruction existed for the author, who has the file, and not for the consumer, who is the only one being instructed. Nothing for you to do; the file simply arrives from this release on.
+
 ## [0.7.1] — 2026-08-09
 
 ### Added
