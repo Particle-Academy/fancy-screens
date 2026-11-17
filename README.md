@@ -111,7 +111,7 @@ mode falls back to a dependency-free frame; applications that install
 
 ## Inertia.js
 
-Inside an Inertia app, mount `<Screen.System>` at app-shell level (the `@particle-academy/fancy-inertia` adapter's `<FancyAppRoot>` does this for you). The schema-driven mode pairs with Inertia props out of the box via `<InertiaSchemaScreen>`. See [docs/Inertia.md](docs/Inertia.md).
+Inside an Inertia app, mount `<Screen.System>` at app-shell level (the `@particle-academy/fancy-inertia` adapter's `<FancyAppRoot>` does this for you). The schema-driven mode pairs with Inertia props via `<InertiaSchemaScreen>`, which ships in `@particle-academy/fancy-inertia` (not in this package). See [docs/Inertia.md](docs/Inertia.md).
 
 ## Documentation
 

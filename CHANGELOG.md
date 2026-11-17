@@ -17,6 +17,7 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/), 
 
 ### Fixed
 
+- **Docs:** the README mentioned `<InertiaSchemaScreen>` as if this package provided it. It ships in `@particle-academy/fancy-inertia`, and the README now says so (the Inertia and SchemaMode guides already imported it from there). Docs only; nothing to do.
 - **`CHANGELOG.md` is now in the published tarball.** `files` did not whitelist it, so npm never shipped it — and this package puts breaking changes in MINOR releases and tells you in the README to read the entry before taking one. The instruction existed for the author, who has the file, and not for the consumer, who is the only one being instructed. Nothing for you to do; the file simply arrives from this release on.
 
 ## [0.7.1] — 2026-08-09
