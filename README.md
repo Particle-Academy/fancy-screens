@@ -5,10 +5,10 @@
 **Cross-surface coordination for Human+ apps.** A `<Screen>` is a scoped, addressable application surface — bigger than a tab, smaller than a route. It registers with a global system so agents and presence layers can enumerate and target it, owns its own state (via Zustand stores you bring), and can render either as JSX or from an agent-emitted JSON schema.
 
 <!-- fancy-agents-note:start -->
-> **For agents.** Every Fancy package, this one included, is listed on the
-> Fancy MCP catalog server at `https://ui.particle.academy/mcp` (streamable HTTP, no API key;
-> MCP id `fancy-ui`), with install commands and docs. How an agent installs
-> and uses this package is in [AGENTS.md](https://github.com/Particle-Academy/fancy-screens/blob/main/AGENTS.md).
+> **For agents.** This package is listed on the Fancy MCP catalog server at
+> `https://ui.particle.academy/mcp` (streamable HTTP, no API key; MCP id `fancy-ui`),
+> with install commands and docs, alongside the rest of the kit. How an agent
+> installs and uses this package is in [AGENTS.md](https://github.com/Particle-Academy/fancy-screens/blob/main/AGENTS.md).
 <!-- fancy-agents-note:end -->
 
 ## Why
